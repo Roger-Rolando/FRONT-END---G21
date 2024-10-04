@@ -1,53 +1,37 @@
-console.log('Hola JS')
+import { fetchPeliculas, crearPelicula } from './services.js'
+import { renderPeliculas } from './utils.js'
 
-const fetchPeliculas = async () => {
-  const url = 'http://localhost:3000/peliculas'
+const peliculasForm =  document.querySelector('#peliculasForm')
 
-  const response = await fetch(url)
+peliculasForm.addEventListener('submit', async (event) => {
+  event.preventDefault()
 
-  return await response.json()
-}
+  const peliculaForm = document.forms['peliculasForm']
 
-const renderPeliculas = (peliculas = []) => {
-  const peliculasList = document.querySelector('.peliculas__list')
+  const nombre = peliculaForm.nombre.value
+  const imagen = peliculaForm.imagen.value
+  const estreno = peliculaForm.estreno.value
+  const genero = peliculaForm.genero.value
+  const resumen = peliculaForm.resumen.value
 
-  let elementos = ''
+  const nuevaPelicula = {
+    nombre,
+    imagen,
+    estreno,
+    generoId: genero,
+    resumen
+  }
 
-  peliculas.forEach(pelicula => {
-    elementos += `
-      <tr>
-        <td>${pelicula.id}</td>
-        <td>
-          <img
-            src="${pelicula.imagen}"
-            width="100"
-            height="250"
-          />
-        </td>
-        <td>
-          <strong>${pelicula.nombre}</strong>
-          <div class="fs-small">
-            <strong>Release:</strong> ${pelicula.estreno}
-          </div>
-          <div class="fs-small">
-            <strong>Genero:</strong> ${pelicula.generoId}
-          </div>
-          <div class="fs-small">
-            <strong>Resumen:</strong> ${pelicula.resumen}
-          </div>
-        </td>
-        <td>
-          <div class="flex gap-0.5">
-            <button class="pelicula__edit">✏</button>
-            <button class="pelicula__remove">❌</button>
-          </div>        
-        </td>
-      </tr>
-    `
-  })
+  const response = await crearPelicula(nuevaPelicula)
 
-  peliculasList.innerHTML = elementos
-}
+  if (response) {
+    const peliculas = await fetchPeliculas()
+    
+    renderPeliculas(peliculas)
+
+    peliculaForm.reset()
+  }
+})
 
 fetchPeliculas()
   .then(peliculas => renderPeliculas(peliculas))
